@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tic Tac Toe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    @keyframes gradientBG {
+      0%   { background-position:0% 50%; }
+      50%  { background-position:100% 50%; }
+      100% { background-position:0% 50%; }
+    }
+
+    .container {
+      background: #fff;
+      padding: 18px 20px 22px 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px #bbb;
+      max-width: 340px;
+      width: 100%;
+    }
+    .title {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 2em;
+      font-weight: bold;
+      color: #464646;
+    }
+    .status {
+      text-align: center;
+      margin-bottom: 16px;
+      font-size: 1.15em;
+      color: #444;
+      min-height: 1.5em;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 70px);
+      grid-template-rows: repeat(3, 70px);
+      gap: 9px;
+      justify-content: center;
+    }
+    .cell {
+      background: #e0e0e0;
+      border: none;
+      border-radius: 10px;
+      font-size: 2.6em;
+      font-weight: bold;
+      color: #3066be;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+      outline: none;
+    }
+    .cell:active {
+      background: #c0d6ec;
+    }
+    .cell.disabled {
+      pointer-events: none;
+      color: #888;
+      background: #f7f7f7;
+    }
+    .restart-btn {
+      margin-top: 17px;
+      display: block;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 9px;
+      background: #3066be;
+      color: #fff;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .restart-btn:active {
+      background: #204678;
+    }
+    @media (max-width: 440px) {
+      .container { max-width: 99vw; padding: 10px 2px 12px 2px; }
+      .title { font-size: 1.4em; }
+      .board { grid-template-columns: repeat(3, 20vw); grid-template-rows: repeat(3, 20vw); gap: 3vw;}
+      .cell { font-size: 2em; }
+      .restart-btn { font-size: 1em; padding: 8px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">Tic Tac Toe</div>
+    <div class="status" id="status"></div>
+    <div class="board" id="board">
+      <!-- 9 cells generated via JS -->
+    </div>
+    <button class="restart-btn" id="restartBtn">Restart Game</button>
+  </div>
+
+  <script>
+    const statusDiv = document.getElementById("status");
+    const boardDiv = document.getElementById("board");
+    const restartBtn = document.getElementById("restartBtn");
+    let board, currentPlayer, gameActive;
+
+    function initGame() {
+      board = ["", "", "", "", "", "", "", "", ""];
+      currentPlayer = "X";
+      gameActive = true;
+      updateStatus();
+      renderBoard();
+    }
+
+    function renderBoard() {
+      boardDiv.innerHTML = "";
+      board.forEach((cell, i) => {
+        const btn = document.createElement("button");
+        btn.className = "cell" + (cell ? " disabled" : "");
+        btn.textContent = cell;
+        btn.disabled = !!cell || !gameActive;
+        btn.addEventListener("click", () => handleMove(i));
+        boardDiv.appendChild(btn);
+      });
+    }
+
+    function handleMove(i) {
+      if (!gameActive || board[i]) return;
+      board[i] = currentPlayer;
+      if (checkWin(currentPlayer)) {
+        statusDiv.textContent = `Player ${currentPlayer} wins! 🎉`;
+        gameActive = false;
+        disableBoard();
+      } else if (board.every(cell => cell)) {
+        statusDiv.textContent = "It's a tie! 🤝";
+        gameActive = false;
+      } else {
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        updateStatus();
+      }
+      renderBoard();
+    }
+
+    function disableBoard() {
+      document.querySelectorAll(".cell").forEach(cell => cell.classList.add("disabled"));
+    }
+
+    function updateStatus() {
+      statusDiv.textContent = `Player ${currentPlayer}'s turn`;
+    }
+
+    function checkWin(player) {
+      const winCombos = [
+        [0,1,2],[3,4,5],[6,7,8], // rows
+        [0,3,6],[1,4,7],[2,5,8], // cols
+        [0,4,8],[2,4,6] // diagonals
+      ];
+      return winCombos.some(combo => 
+        combo.every(idx => board[idx] === player)
+      );
+    }
+
+    restartBtn.addEventListener("click", initGame);
+
+    // Initial start
+    initGame();
+  </script>
+</body>
+</html>
